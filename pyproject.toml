@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ghostty-yazi-flavor"
+version = "0.1.0"
+description = "Generate a yazi flavor from your active Ghostty theme — hover bars and code-preview highlighting that actually match your terminal."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Spencer Presley" }]
+requires-python = ">=3.9"
+keywords = ["yazi", "ghostty", "theme", "flavor", "terminal"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Terminals",
+]
+
+[project.scripts]
+ghostty-yazi-flavor = "ghostty_yazi_flavor:main"
+
+[project.urls]
+Homepage = "https://github.com/SpencerPresley/ghostty-yazi-flavor"
+Issues = "https://github.com/SpencerPresley/ghostty-yazi-flavor/issues"
+
+[tool.setuptools]
+py-modules = ["ghostty_yazi_flavor"]
