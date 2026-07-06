@@ -34,10 +34,18 @@ def find_ghostty(explicit=None):
 
 
 def resolved_config(ghostty):
-    out = subprocess.run(
-        [ghostty, "+show-config"], capture_output=True, text=True, check=True
-    ).stdout
-    return out.splitlines()
+    try:
+        proc = subprocess.run(
+            [ghostty, "+show-config"], capture_output=True, text=True
+        )
+    except OSError as e:
+        sys.exit(f"ghostty-yazi-flavor: failed to run {ghostty}: {e}")
+    if proc.returncode != 0:
+        sys.exit(
+            f"ghostty-yazi-flavor: `{ghostty} +show-config` failed "
+            f"(exit {proc.returncode}):\n{proc.stderr.strip()}"
+        )
+    return proc.stdout.splitlines()
 
 
 def norm_hex(value):

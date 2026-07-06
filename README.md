@@ -61,10 +61,12 @@ light = "ghostty"
 
 ```bash
 ghostty-yazi-flavor                    # regenerate from the current theme
+ghostty-yazi-flavor status             # what's generated, is the watcher on
 ```
 
-Change your Ghostty theme → run it again → restart yazi. Options:
-`--out <dir>`, `--ghostty <path>`, `--version`.
+Change your Ghostty theme → run it again → restart yazi. The full grammar is
+`generate` (the default; takes `--out <dir>` and `--ghostty <path>`),
+`install-watcher [--print]`, `uninstall-watcher`, and `status`.
 
 ## Automatic regeneration
 
