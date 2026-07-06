@@ -9,6 +9,11 @@ fighting it.
 
 <!-- TODO: before/after screenshots -->
 
+> [!TIP]
+> There's also a **native yazi plugin** version of this:
+> [ghostty-flavor.yazi](https://github.com/SpencerPresley/ghostty-flavor.yazi).
+> See [This CLI or the plugin?](#this-cli-or-the-plugin) to pick the right one.
+
 ## Why
 
 Yazi's default theme follows your terminal's 16-color ANSI palette, which gets
