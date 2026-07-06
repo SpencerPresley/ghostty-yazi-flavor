@@ -7,6 +7,8 @@ Generate a [yazi](https://yazi-rs.github.io/) flavor from your active
 code-preview syntax highlighting actually match your terminal instead of
 fighting it.
 
+![demo: stock yazi vs after ghostty-yazi-flavor](assets/demo.gif)
+
 > [!TIP]
 > There's also a **native yazi plugin** version of this:
 > [ghostty-flavor.yazi](https://github.com/SpencerPresley/ghostty-flavor.yazi).
