@@ -25,6 +25,32 @@ Hand-made flavors fix this for popular themes (catppuccin, dracula, …). For
 the other ~450 themes Ghostty ships with — or your own custom one — this tool
 generates the flavor from whatever theme is actually active.
 
+## This CLI or the plugin?
+
+Same idea, two delivery mechanisms — this CLI has a yazi-plugin sibling,
+[ghostty-flavor.yazi](https://github.com/SpencerPresley/ghostty-flavor.yazi).
+Both read the same source (`ghostty +show-config`) and produce the same
+colors; pick one, running both is redundant.
+
+|  | [plugin](https://github.com/SpencerPresley/ghostty-flavor.yazi) | this CLI |
+|---|---|---|
+| Install | `ya pkg add SpencerPresley/ghostty-flavor` | `uv tool install ghostty-yazi-flavor` |
+| Sync happens | every yazi launch, automatically | file watcher / dotfiles hook / manual run |
+| UI colors | applied live, current launch | flavor file, read at next launch |
+| On disk | a cached tmTheme | a full inspectable flavor (`flavor.toml` + `tmtheme.xml`) |
+| Startup cost | ~15–20 ms (spawns ghostty) | none |
+| Best for | set-and-forget | declarative dotfiles, static config |
+
+**Use the plugin** if you just want yazi to match Ghostty with zero
+maintenance — it re-syncs itself on every launch.
+
+**Use this CLI** if you want theming to be static files you can read, diff,
+and version; if you drive your machine declaratively (chezmoi and friends) and
+want regeneration hooked into that pipeline or an OS-level watcher instead of
+yazi's runtime; or if your yazi predates the plugin API. The tradeoff: sync
+happens outside yazi, so a theme change lands on the next launch after your
+watcher or hook fires.
+
 ## How it works
 
 It runs `ghostty +show-config`, which prints the **resolved** config with the
@@ -49,13 +75,20 @@ uv tool install ghostty-yazi-flavor
 # or: pipx install ghostty-yazi-flavor
 ```
 
-Then point yazi at the flavor in `~/.config/yazi/theme.toml`:
+Run it once, **then** point yazi at the flavor in `~/.config/yazi/theme.toml`:
+
+```bash
+ghostty-yazi-flavor
+```
 
 ```toml
 [flavor]
 dark = "ghostty"
 light = "ghostty"
 ```
+
+(Order matters: yazi errors at startup if `theme.toml` references a flavor
+that doesn't exist yet, so generate before you point.)
 
 ## Use
 
