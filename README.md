@@ -1,5 +1,7 @@
 # ghostty-yazi-flavor
 
+[![PyPI](https://img.shields.io/pypi/v/ghostty-yazi-flavor)](https://pypi.org/project/ghostty-yazi-flavor/)
+
 Generate a [yazi](https://yazi-rs.github.io/) flavor from your active
 [Ghostty](https://ghostty.org/) theme — so yazi's hover bars, mode pills, and
 code-preview syntax highlighting actually match your terminal instead of
@@ -43,10 +45,8 @@ palette (or follow it badly) are overridden.
 ## Install
 
 ```bash
-uv tool install git+https://github.com/SpencerPresley/ghostty-yazi-flavor
-# or: pipx install git+https://github.com/SpencerPresley/ghostty-yazi-flavor
-# or just grab the single stdlib-only file:
-#   curl -o ~/.local/bin/ghostty-yazi-flavor https://raw.githubusercontent.com/SpencerPresley/ghostty-yazi-flavor/main/ghostty_yazi_flavor.py && chmod +x ~/.local/bin/ghostty-yazi-flavor
+uv tool install ghostty-yazi-flavor
+# or: pipx install ghostty-yazi-flavor
 ```
 
 Then point yazi at the flavor in `~/.config/yazi/theme.toml`:
@@ -60,45 +60,49 @@ light = "ghostty"
 ## Use
 
 ```bash
-ghostty-yazi-flavor        # regenerate from the current theme
+ghostty-yazi-flavor                    # regenerate from the current theme
 ```
 
-Change your Ghostty theme → run it again → restart yazi. That's the whole
-loop. Options: `--out <dir>`, `--ghostty <path>`, `--version`.
+Change your Ghostty theme → run it again → restart yazi. Options:
+`--out <dir>`, `--ghostty <path>`, `--version`.
 
-## Automating "run it again"
-
-**macOS — launchd WatchPaths** (regenerate on any write to the Ghostty
-config, no polling, no dependencies). Save as
-`~/Library/LaunchAgents/com.ghostty-yazi-flavor.plist`, substituting
-`YOUR_USER`:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>Label</key>
-	<string>com.ghostty-yazi-flavor</string>
-	<key>ProgramArguments</key>
-	<array>
-		<string>/Users/YOUR_USER/.local/bin/ghostty-yazi-flavor</string>
-	</array>
-	<key>WatchPaths</key>
-	<array>
-		<string>/Users/YOUR_USER/.config/ghostty/config</string>
-	</array>
-</dict>
-</plist>
-```
+## Automatic regeneration
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.ghostty-yazi-flavor.plist
+ghostty-yazi-flavor install-watcher    # set it and forget it
 ```
 
-**Linux — systemd path unit**: a `ghostty-yazi-flavor.path` watching
-`%h/.config/ghostty/config` paired with a oneshot `.service` does the same
-job.
+Installs a file watcher on your Ghostty config (and custom themes directory,
+if you have one), so the flavor regenerates on every config write — including
+saves that you follow with Ghostty's reload-config keybinding:
+
+- **macOS**: a launchd LaunchAgent using `WatchPaths` — event-driven, no
+  polling, no dependencies. Logs to `~/Library/Logs/ghostty-yazi-flavor.log`.
+- **Linux**: systemd user units (a `.path` watching the config + a oneshot
+  `.service`).
+
+`--print` shows exactly what would be installed without touching anything;
+`ghostty-yazi-flavor uninstall-watcher` removes it cleanly.
+
+**Non-systemd Linux**: run a watch loop under your supervisor of choice
+(supervisord, runit, …):
+
+```bash
+inotifywait -m -e close_write ~/.config/ghostty/config | while read -r _; do
+  ghostty-yazi-flavor
+done
+```
+
+**chezmoi**: if your Ghostty config is managed there, skip the watcher and
+hook regeneration to the source of truth instead:
+
+```bash
+# .chezmoiscripts/run_onchange_after_sync-yazi-flavor.sh.tmpl
+#!/bin/bash
+set -euo pipefail
+# ghostty config hash: {{ include "dot_config/ghostty/config" | sha256sum }}
+"$HOME/.local/bin/ghostty-yazi-flavor"
+```
 
 ## tmux note
 
@@ -107,17 +111,6 @@ If yazi renders **colorless** inside tmux, the pane environment is missing
 
 ```tmux
 set -ga update-environment COLORTERM
-```
-
-**chezmoi** (if your Ghostty config is managed there, hook regeneration to
-the file actually changing):
-
-```bash
-# .chezmoiscripts/run_onchange_after_sync-yazi-flavor.sh.tmpl
-#!/bin/bash
-set -euo pipefail
-# ghostty config hash: {{ include "dot_config/ghostty/config" | sha256sum }}
-"$HOME/.local/bin/ghostty-yazi-flavor"
 ```
 
 ## License

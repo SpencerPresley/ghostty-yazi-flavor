@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ghostty-yazi-flavor"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Generate a yazi flavor from your active Ghostty theme — hover bars and code-preview highlighting that actually match your terminal."
 readme = "README.md"
 license = { text = "MIT" }
@@ -21,11 +21,14 @@ classifiers = [
 ]
 
 [project.scripts]
-ghostty-yazi-flavor = "ghostty_yazi_flavor:main"
+ghostty-yazi-flavor = "ghostty_yazi_flavor.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/SpencerPresley/ghostty-yazi-flavor"
 Issues = "https://github.com/SpencerPresley/ghostty-yazi-flavor/issues"
 
-[tool.setuptools]
-py-modules = ["ghostty_yazi_flavor"]
+[tool.setuptools.dynamic]
+version = { attr = "ghostty_yazi_flavor.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

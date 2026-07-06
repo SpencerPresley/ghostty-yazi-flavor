@@ -1,23 +1,10 @@
-#!/usr/bin/env python3
-"""Generate a yazi flavor from the active Ghostty theme.
+"""Parse the resolved Ghostty config and render the yazi flavor files.
 
-Reads the resolved Ghostty config (`ghostty +show-config`, which already has
-the active theme's palette applied — works for built-in themes, custom themes
-in ~/.config/ghostty/themes, and includes/overrides) and writes:
-
-    ~/.config/yazi/flavors/ghostty.yazi/flavor.toml   UI colors
-    ~/.config/yazi/flavors/ghostty.yazi/tmtheme.xml   code-preview highlighting
-
-Why this exists: yazi's default theme follows the terminal's ANSI palette, but
-two things don't — the syntect code-preview theme (hardcoded default) and the
-reverse-video hover indicators, which turn whole rows into blocks of whatever
-neon a theme puts in its blue slot. This maps the actual theme hexes onto
-those spots deliberately.
-
-Stdlib only. Restart yazi after running to pick up changes.
+`ghostty +show-config` prints the config with the active theme's palette
+already applied — built-in themes, custom themes in ~/.config/ghostty/themes,
+and includes are all resolved by Ghostty itself, so no theme-file hunting.
 """
 
-import argparse
 import os
 import re
 import shutil
@@ -25,8 +12,6 @@ import subprocess
 import sys
 import uuid
 from string import Template
-
-__version__ = "0.1.0"
 
 MACOS_APP_BIN = "/Applications/Ghostty.app/Contents/MacOS/ghostty"
 DEFAULT_OUT = "~/.config/yazi/flavors/ghostty.yazi"
@@ -195,20 +180,9 @@ def render_tmtheme(theme_name, p, bg, fg, cursor, selbg):
 """
 
 
-def main():
-    ap = argparse.ArgumentParser(
-        prog="ghostty-yazi-flavor",
-        description="Generate a yazi flavor from the active Ghostty theme.",
-    )
-    ap.add_argument("--out", default=DEFAULT_OUT,
-                    help=f"output flavor directory (default: {DEFAULT_OUT})")
-    ap.add_argument("--ghostty", default=None,
-                    help="path to the ghostty binary (default: autodetect)")
-    ap.add_argument("--version", action="version", version=__version__)
-    args = ap.parse_args()
-
-    ghostty = find_ghostty(args.ghostty)
-    palette, scalars = parse(resolved_config(ghostty))
+def generate(out=DEFAULT_OUT, ghostty=None):
+    ghostty_bin = find_ghostty(ghostty)
+    palette, scalars = parse(resolved_config(ghostty_bin))
     missing = [i for i in range(16) if i not in palette]
     if missing:
         sys.exit(f"ghostty-yazi-flavor: palette slots missing: {missing}")
@@ -220,7 +194,7 @@ def main():
     selbg = norm_hex(scalars.get("selection-background", "")) or p[8]
     theme_name = scalars.get("theme") or "(no theme set)"
 
-    out_dir = os.path.expanduser(args.out)
+    out_dir = os.path.expanduser(out)
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "flavor.toml"), "w") as f:
         f.write(render_flavor(theme_name, p, bg, fg))
@@ -228,7 +202,3 @@ def main():
         f.write(render_tmtheme(theme_name, p, bg, fg, cursor, selbg))
     print(f'ghostty-yazi-flavor: wrote {out_dir} from theme "{theme_name}"')
     print("restart yazi to pick it up")
-
-
-if __name__ == "__main__":
-    main()
